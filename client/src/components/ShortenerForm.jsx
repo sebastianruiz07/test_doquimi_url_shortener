@@ -1,11 +1,13 @@
-import { Button, Grid2 as Grid, IconButton, TextField, Tooltip, Typography } from '@mui/material';
+import { Button, Grid2 as Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from '@mui/material';
 import { useState } from 'react';
 import axios from 'axios';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import { ContentCopy as ContentCopyIcon, Close as CloseIcon} from '@mui/icons-material';
 
 const ShortenerForm = () => {
   const [originalUrl, setOriginalUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
+  const [copyUrl, setCopyUrl] = useState(false);
+  const [copyUrlMessage, setCopyUrlMessage] = useState('');
 
   const getShortenedUrl = async () => {
     try {
@@ -17,10 +19,33 @@ const ShortenerForm = () => {
   }
 
   const copyShortUrlToClipboard = () => {
-    if(shortUrl.length > 0) {
-      navigator.clipboard.writeText(shortUrl);
+    if (shortUrl.length > 0) {
+      navigator.clipboard.writeText(shortUrl).then(() => {
+        setCopyUrl(true);
+        setCopyUrlMessage('URL copied successfully')
+      }).catch((error) => {
+        setCopyUrl(true);
+        setCopyUrlMessage('Error copying URL');
+      });
     }
   }
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setCopyUrl(false);
+  };
+
+  const action = (
+    <IconButton
+      size="small"
+      onClick={handleCloseSnackbar}
+    >
+      <CloseIcon fontSize="small" />
+    </IconButton>
+  )
 
   return (
     <Grid container justifyContent={'center'}>
@@ -64,6 +89,13 @@ const ShortenerForm = () => {
           </Grid>
         </Grid>
       </Grid>
+      <Snackbar
+        open={copyUrl}
+        autoHideDuration={5000}
+        onClose={handleCloseSnackbar}
+        message={copyUrlMessage}
+        action={action}
+      />
     </Grid>
   )
 }
