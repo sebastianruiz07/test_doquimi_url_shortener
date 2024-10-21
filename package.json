@@ -4,7 +4,7 @@
   "description": "URL Shortener in NodeJS with ReactJS",
   "main": "index.js",
   "engines": {
-    "node": "22.5.1"
+    "node": "22.10.0"
   },
   "scripts": {
     "start": "node server/index.js",
