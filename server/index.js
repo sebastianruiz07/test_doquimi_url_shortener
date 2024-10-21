@@ -51,7 +51,7 @@ app.post('/api/urlshort', (req, res) => {
 
 app.get('/:shortUrlId', (req, res) => {
   const shortUrlId = req.params.shortUrlId;
-  const query = `SELECT originalUrl FROM urls WHERE id = ?`;
+  const query = `SELECT original_url FROM urls WHERE id = ?`;
 
   db.get(query, [shortUrlId], (error, row) => {
     if (error) {
@@ -61,7 +61,7 @@ app.get('/:shortUrlId', (req, res) => {
       return res.status(404).json({ error: 'URL not found' });
     }
 
-    res.redirect(row.originalUrl);
+    res.redirect(row.original_url);
   });
 });
 
