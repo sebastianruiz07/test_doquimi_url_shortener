@@ -42,7 +42,7 @@ app.post('/api/urlshort', (req, res) => {
         return console.error(error.message);
       }
 
-      const shortUrl = `http://localhost:3001/${shortUrlId}`;
+      const shortUrl = `http://sebastian.lab.doqimi.net:3001/${shortUrlId}`;
 
       res.json({ shortUrl });
     });
