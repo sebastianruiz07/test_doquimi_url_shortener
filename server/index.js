@@ -1,6 +1,5 @@
 const path = require('path');
 const express = require("express");
-const shortid = require('shortid');
 const sqlite3 = require('sqlite3').verbose();
 const { generateUniqueId } = require('./util/urlUtils');
 
@@ -15,13 +14,14 @@ const db = new sqlite3.Database('./urlShortener.db', (error) => {
   if (error) {
     return console.log(error.message);
   }
-  console.log('Connected to database succefully');
+  console.log('Connected to database successfully');
 });
 
 db.run(
   `CREATE TABLE IF NOT EXISTS urls (
     id TEXT PRIMARY KEY,
-    originalUrl TEXT NOT NULL )`
+    original_url TEXT NOT NULL,
+    creation_date DATE )`
 );
 
 app.get('/', (req, res) => {
@@ -36,8 +36,8 @@ app.post('/api/urlshort', (req, res) => {
   }
 
   generateUniqueId((shortUrlId) => {
-    const query = `INSERT INTO urls (id, originalUrl) VALUES (?, ?)`;
-    db.run(query, [shortUrlId, originalUrl], (error) => {
+    const query = `INSERT INTO urls (id, original_url, creation_date) VALUES (?, ?, ?)`;
+    db.run(query, [shortUrlId, originalUrl, new Date().toDateString()], (error) => {
       if (error) {
         return console.error(error.message);
       }
@@ -63,7 +63,7 @@ app.get('/:shortUrlId', (req, res) => {
 
     res.redirect(row.originalUrl);
   });
-})
+});
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on ${PORT}`);
