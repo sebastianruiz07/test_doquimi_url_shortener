@@ -21,7 +21,9 @@ db.run(
   `CREATE TABLE IF NOT EXISTS urls (
     id TEXT PRIMARY KEY,
     original_url TEXT NOT NULL,
-    creation_date DATE )`
+    creation_date DATE,
+    password TEXT,
+    expiration_date DATE)`
 );
 
 app.get('/', (req, res) => {
@@ -30,20 +32,23 @@ app.get('/', (req, res) => {
 
 app.post('/api/urlshort', (req, res) => {
   const originalUrl = req.body.url;
+  const password = req.body.password;
+  const creationDate = req.body.creationDate;
+  const expirationDate = req.body.expirationDate;
 
-  if (!originalUrl) {
+  if (!originalUrl || originalUrl.length <= 0) {
     return res.status(400).json({ error: 'No URL provided' })
   }
 
   generateUniqueId((shortUrlId) => {
-    const query = `INSERT INTO urls (id, original_url, creation_date) VALUES (?, ?, ?)`;
-    db.run(query, [shortUrlId, originalUrl, new Date().toDateString()], (error) => {
+    const query = `INSERT INTO urls (id, original_url, creation_date, password, expiration_date) VALUES (?, ?, ?, ?, ?)`;
+    
+    db.run(query, [shortUrlId, originalUrl, creationDate, password, expirationDate], (error) => {
       if (error) {
         return console.error(error.message);
       }
 
       const shortUrl = `http://sebastian.lab.doqimi.net:3001/${shortUrlId}`;
-
       res.json({ shortUrl });
     });
   });

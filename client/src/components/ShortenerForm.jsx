@@ -1,18 +1,35 @@
-import { Button, Grid2 as Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from '@mui/material';
 import { useState } from 'react';
-import axios from 'axios';
-import { ContentCopy as ContentCopyIcon, Close as CloseIcon} from '@mui/icons-material';
+import dayjs from 'dayjs';
+import { Alert, Button, Checkbox, FormControlLabel, Grid2 as Grid, IconButton, Snackbar, TextField, Toolbar, Tooltip, Typography } from '@mui/material';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import getShortenedUrl from '../services/service';
+import ShowShortenUrl from './ShowShortenUrl';
+import CustomAlert from './CustomAlert';
 
 const ShortenerForm = () => {
   const [originalUrl, setOriginalUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
-  const [copyUrl, setCopyUrl] = useState(false);
-  const [copyUrlMessage, setCopyUrlMessage] = useState('');
+  const [openAlert, setOpenAlert] = useState(false);
+  const [alertType, setAlertType] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [hasPassword, setHasPassword] = useState(false);
+  const [password, setPassword] = useState(null);
+  const [hasExpirationDate, setHasExpirationDate] = useState(false);
+  const [expirationDate, setExpirationDate] = useState(null);
 
-  const getShortenedUrl = async () => {
+  const getShortenedUrlFunction = () => {
+    if (originalUrl.length <= 0) {
+      setOpenAlert(true);
+      setAlertType('info');
+      setAlertMessage("Please fill the URL to shortener");
+      return;
+    }
     try {
-      const response = await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl });
-      setShortUrl(response.data.shortUrl);
+      const creationDate = dayjs();
+      getShortenedUrl(originalUrl, password, creationDate, expirationDate, setShortUrl);
     } catch (error) {
       console.error('Error shortering the URL: ', error);
     }
@@ -21,11 +38,13 @@ const ShortenerForm = () => {
   const copyShortUrlToClipboard = () => {
     if (shortUrl.length > 0) {
       navigator.clipboard.writeText(shortUrl).then(() => {
-        setCopyUrl(true);
-        setCopyUrlMessage('URL copied successfully')
+        setOpenAlert(true);
+        setAlertType('success');
+        setAlertMessage('URL copied successfully');
       }).catch((error) => {
-        setCopyUrl(true);
-        setCopyUrlMessage('Error copying URL');
+        setOpenAlert(true);
+        setAlertType('error');
+        setAlertMessage('Error copying URL');
       });
     }
   }
@@ -35,17 +54,27 @@ const ShortenerForm = () => {
       return;
     }
 
-    setCopyUrl(false);
+    setOpenAlert(false);
   };
 
-  const action = (
-    <IconButton
-      size="small"
-      onClick={handleCloseSnackbar}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  )
+  const handleCheckPassword = (event) => {
+    setHasPassword(event.target.checked);
+
+    if (!event.target.checked) {
+      setPassword(null);
+    }
+  }
+
+  const handleCheckExpirationDate = (event) => {
+    setHasExpirationDate(event.target.checked);
+
+    if (event.target.checked) {
+      const date = dayjs();
+      setExpirationDate(date);
+    } else {
+      setExpirationDate(null);
+    }
+  }
 
   return (
     <Grid container justifyContent={'center'}>
@@ -62,40 +91,69 @@ const ShortenerForm = () => {
                   id="url-text"
                   label="Paste the URL: "
                   fullWidth
-                  onChange={(e) => { setOriginalUrl(e.target.value) }}
+                  onChange={(e) => setOriginalUrl(e.target.value)}
                 />
               </Grid>
               <Grid item size={{ xs: 12, md: 2 }}>
-                <Button size={'large'} onClick={() => getShortenedUrl()}>Shorten</Button>
+                <Toolbar title={originalUrl.length <= 0 ? 'Please set an URL' : 'Shorten URL'}>
+                  <Button
+                    size={'large'}
+                    onClick={() => getShortenedUrlFunction()}
+                    disabled={originalUrl.length <= 0 ? true : false}>
+                    Shorten
+                  </Button>
+                </Toolbar>
               </Grid>
             </Grid>
           </Grid>
           <Grid item size={12}>
-            <Grid container>
-              <Grid item size={{ xs: 12, md: 2 }}>
-                <Typography variant='subtitle1'>Shortened URL: </Typography>
+            <Grid container spacing={2} alignItems={'center'}>
+              <Grid item size={8}>
+                <Grid container spacing={2}>
+                  <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
+                    <FormControlLabel
+                      control={<Checkbox checked={hasPassword} onChange={(e) => handleCheckPassword(e)} />}
+                      label="Set password to URL: "
+                    />
+                  </Grid>
+                  <Grid item size={{ xs: 12, md: 8 }}>
+                    <TextField
+                      id="url-password"
+                      label="Type password: "
+                      fullWidth
+                      disabled={!hasPassword}
+                      onChange={(e) => { setPassword(e.target.value) }}
+                    />
+                  </Grid>
+                  <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
+                    <FormControlLabel
+                      control={<Checkbox checked={hasExpirationDate} onChange={(e) => handleCheckExpirationDate(e)} />}
+                      label="Set expiration date to URL:"
+                    />
+                  </Grid>
+                  <Grid item size={{ xs: 12, md: 8 }}>
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                      <DemoContainer components={['DatePicker']}>
+                        <DatePicker
+                          disabled={!hasExpirationDate}
+                          label="Set expiration date to URL"
+                          value={expirationDate}
+                          minDate={dayjs()}
+                          onChange={(newValue) => setExpirationDate(newValue)}
+                        />
+                      </DemoContainer>
+                    </LocalizationProvider>
+                  </Grid>
+                </Grid>
               </Grid>
-              <Grid item size={{ xs: 11, md: 9 }}>
-                <Typography variant='subtitle1'>{shortUrl}</Typography>
-              </Grid>
-              <Grid item size={{ xs: 1, md: 1 }} visibility={shortUrl.length > 0 ? 'visible' : 'hidden'}>
-                <Tooltip title='Copy to clipboard'>
-                  <IconButton onClick={() => copyShortUrlToClipboard()}>
-                    <ContentCopyIcon />
-                  </IconButton>
-                </Tooltip>
+              <Grid item size={12}>
               </Grid>
             </Grid>
           </Grid>
+          <ShowShortenUrl shortUrl={shortUrl} copyShortUrlToClipboard={() => copyShortUrlToClipboard()} />
         </Grid>
       </Grid>
-      <Snackbar
-        open={copyUrl}
-        autoHideDuration={5000}
-        onClose={handleCloseSnackbar}
-        message={copyUrlMessage}
-        action={action}
-      />
+      <CustomAlert openAlert={openAlert} handleCloseSnackbar={handleCloseSnackbar} alertType={alertType} alertMessage={alertMessage} />
     </Grid>
   )
 }
