@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require("express");
 const sqlite3 = require('sqlite3').verbose();
+const cors = require('cors');
 const { generateUniqueId } = require('./util/urlUtils');
 
 const PORT = process.env.PORT || 3001;
@@ -9,6 +10,7 @@ const app = express();
 
 app.use(express.static(path.resolve(__dirname, '../client/build')));
 app.use(express.json());
+app.use(cors());
 
 const db = new sqlite3.Database('./urlShortener.db', (error) => {
   if (error) {
