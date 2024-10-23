@@ -36,7 +36,7 @@ const HomeView = () => {
     setHasPassword(event.target.checked);
 
     if (!event.target.checked) {
-      setPassword(null);
+      setPassword('');
     }
   }
 

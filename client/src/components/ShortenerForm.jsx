@@ -11,7 +11,7 @@ import ShowShortenUrl from './ShowShortenUrl';
 import { MyContext } from '../context/MyContext';
 
 const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
-  const { shortUrl, originalUrl, setOriginalUrl, hasPassword, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
+  const { shortUrl, originalUrl, setOriginalUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
   return (
     <Grid item size={{ xs: 10, md: 8 }}>
       <Grid container spacing={2}>
@@ -40,7 +40,7 @@ const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleChe
         </Grid>
         <Grid item size={12}>
           <Grid container spacing={2} alignItems={'center'}>
-            <Grid item size={8}>
+            <Grid item size={10}>
               <Grid container spacing={2}>
                 <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
                   <FormControlLabel
@@ -52,8 +52,10 @@ const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleChe
                   <TextField
                     id="url-password"
                     label="Type password: "
+                    type="password"
                     fullWidth
                     disabled={!hasPassword}
+                    value={password}
                     onChange={(e) => { setPassword(e.target.value) }}
                   />
                 </Grid>
@@ -68,7 +70,7 @@ const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleChe
                     <DemoContainer components={['DatePicker']}>
                       <DatePicker
                         disabled={!hasExpirationDate}
-                        label="Set expiration date to URL"
+                        label="Set expiration date"
                         value={expirationDate}
                         minDate={dayjs()}
                         onChange={(newValue) => setExpirationDate(newValue)}
