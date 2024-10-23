@@ -38,24 +38,30 @@ const RedirectView = () => {
           <Grid item size={12}>
             <Typography variant='h6' textAlign={'center'}>Please enter the password to continue:</Typography>
           </Grid>
-          <Grid item size={6} display={'flex'} justifyContent={'center'}>
-            <TextField
-              required
-              id="url-password"
-              label="Enter the password: "
-              fullWidth
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Grid>
-          <Grid item size={12} display={'flex'} justifyContent={'center'}>
-            <Tooltip title={''}>
-              <Button
-                size={'large'}
-                disabled={password.length <= 0 ? true : false}
-                onClick={() => verifyPassword()}>
-                Continue <ArrowForwardIcon />
-              </Button>
-            </Tooltip>
+          <Grid item size={6}>
+            <Grid container spacing={3} justifyContent={'center'}>
+              <Grid item size={12}>
+                <TextField
+                  required
+                  id="url-password"
+                  label="Enter the password: "
+                  fullWidth
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </Grid>
+              <Grid item size={6}>
+                <Tooltip title={''}>
+                  <Button
+                    size={'large'}
+                    variant='contained'
+                    disabled={password.length <= 0 ? true : false}
+                    fullWidth
+                    onClick={() => verifyPassword()}>
+                    Continue <ArrowForwardIcon />
+                  </Button>
+                </Tooltip>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
       </Grid>

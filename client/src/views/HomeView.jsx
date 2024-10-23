@@ -9,10 +9,25 @@ import CustomAlert from '../components/CustomAlert';
 const HomeView = () => {
   const { shortUrl, originalUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
 
+  const validateUrl = (url) => {
+    const urlPattern = new RegExp(
+      '^(https?:\\/\\/)?' +
+      '((([a-zA-Z\\d]([a-zA-Z\\d-]*[a-zA-Z\\d])*)\\.)+[a-zA-Z]{2,}|' +
+      '((\\d{1,3}\\.){3}\\d{1,3}))' +
+      '(\\:\\d+)?(\\/[-a-zA-Z\\d%_.~+]*)*' +
+      '(\\?[;&a-zA-Z\\d%_.~+=-]*)?' +
+      '(\\#[-a-zA-Z\\d_]*)?$',
+      'i'
+    );
+    return urlPattern.test(url);
+  };
+
   const getShortenedUrl = async () => {
     if (originalUrl.length <= 0) {
-      setCustomAlert({ open: true, type: 'info', message: "Please fill the URL to shortener" });
-      return;
+      return setCustomAlert({ open: true, type: 'info', message: "Please fill the URL to shortener" });
+    }
+    if (!validateUrl(originalUrl)) {
+      return setCustomAlert({ open: true, type: 'error', message: "Invalid URL, please check it and try again" });
     }
     try {
       const creationDate = dayjs();
