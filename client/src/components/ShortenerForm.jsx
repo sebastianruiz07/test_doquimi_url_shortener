@@ -10,7 +10,7 @@ import ShowShortenUrl from './ShowShortenUrl';
 
 import { MyContext } from '../context/MyContext';
 
-const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
+const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
   const { shortUrl, originalUrl, setOriginalUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
   return (
     <Grid item size={{ xs: 10, md: 8 }}>
@@ -30,7 +30,7 @@ const ShortenerForm = ({ getShortenedUrlFunction, handleCheckPassword, handleChe
               <Toolbar title={originalUrl.length <= 0 ? 'Please set an URL' : 'Shorten URL'}>
                 <Button
                   size={'large'}
-                  onClick={() => getShortenedUrlFunction()}
+                  onClick={() => getShortenedUrl()}
                   disabled={originalUrl.length <= 0 ? true : false}>
                   Shorten
                 </Button>

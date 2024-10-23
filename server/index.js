@@ -102,7 +102,7 @@ app.post('/api/verifypass/:shortUrlId', (req, res) => {
     }
 
     if (row.password === password) {
-      return res.redirect(row.original_url);
+      return res.json({original_url: row.original_url})
     } else {
       return res.status(401).json({ error: 'Incorrect password' });
     }

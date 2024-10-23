@@ -1,23 +1,26 @@
 import { useContext } from "react";
+import dayjs from "dayjs";
+import axios from "axios";
 import { Grid2 as Grid, Typography } from "@mui/material";
 import { default as ShortenerForm } from "../components/ShortenerForm";
 import { MyContext } from "../context/MyContext";
 import CustomAlert from '../components/CustomAlert';
-import { getShortenedUrl } from '../services/service';
-import dayjs from "dayjs";
 
 const HomeView = () => {
   const { shortUrl, originalUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
 
-  const getShortenedUrlFunction = () => {
+  const getShortenedUrl = async () => {
     if (originalUrl.length <= 0) {
       setCustomAlert({ open: true, type: 'info', message: "Please fill the URL to shortener" });
       return;
     }
     try {
       const creationDate = dayjs();
-      getShortenedUrl(originalUrl, password, creationDate, expirationDate, setShortUrl);
+      await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
+        setShortUrl(urlResponse.data.shortUrl);
+      });
     } catch (error) {
+      setCustomAlert({ open: true, type: 'error', message: 'Error shortering the URL' });
       console.error('Error shortering the URL: ', error);
     }
   }
@@ -57,7 +60,7 @@ const HomeView = () => {
         <Typography variant='h4' textAlign={'center'}>URL Shortener</Typography>
       </Grid>
       <ShortenerForm
-        getShortenedUrlFunction={getShortenedUrlFunction}
+        getShortenedUrl={getShortenedUrl}
         handleCheckPassword={handleCheckPassword}
         handleCheckExpirationDate={handleCheckExpirationDate}
         copyShortUrlToClipboard={copyShortUrlToClipboard} />

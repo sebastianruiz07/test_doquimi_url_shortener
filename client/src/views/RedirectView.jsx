@@ -1,8 +1,8 @@
-import { Box, Button, CircularProgress, Grid2 as Grid, TextField, Tooltip, Typography } from '@mui/material';
-import { ArrowForward as ArrowForwardIcon } from '@mui/icons-material';
+import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import { useContext, useState } from 'react';
-import { passwordMatches } from '../services/service';
+import { Box, Button, CircularProgress, Grid2 as Grid, TextField, Tooltip, Typography } from '@mui/material';
+import { ArrowForward as ArrowForwardIcon } from '@mui/icons-material';
 import { MyContext } from '../context/MyContext';
 import CustomAlert from '../components/CustomAlert';
 
@@ -11,13 +11,17 @@ const RedirectView = () => {
   const [password, setPassword] = useState('');
   const { setCustomAlert } = useContext(MyContext);
 
-  const verifyPassword = () => {
+  const verifyPassword = async () => {
     try {
-      passwordMatches(shortUrlId, password);
+      await axios.post(`http://localhost:3001/api/verifypass/${shortUrlId}`, { password: password }).then((response) => {
+        window.location.href = response.data.original_url;
+      });
     } catch (error) {
-      setCustomAlert({open: true, type: 'error', message: 'Incorrect password, please try again.'})
+      setCustomAlert({ open: true, type: 'error', message: 'Incorrect password, please try again.' })
+      console.error('Error with password: ', error);
     }
   }
+
 
   return (
     <Grid container justifyContent={'center'} spacing={3}>
@@ -47,6 +51,7 @@ const RedirectView = () => {
             <Tooltip title={''}>
               <Button
                 size={'large'}
+                disabled={password.length <= 0 ? true : false}
                 onClick={() => verifyPassword()}>
                 Continue <ArrowForwardIcon />
               </Button>
