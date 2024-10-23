@@ -2,6 +2,7 @@ const path = require('path');
 const express = require("express");
 const sqlite3 = require('sqlite3').verbose();
 const cors = require('cors');
+const bcrypt = require('bcrypt')
 const { generateUniqueId } = require('./util/urlUtils');
 
 const PORT = process.env.PORT || 3001;
@@ -36,7 +37,7 @@ app.get('/redirect/:shortUrlId', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
 });
 
-app.post('/api/urlshort', (req, res) => {
+app.post('/api/urlshort', async (req, res) => {
   const originalUrl = req.body.url;
   const password = req.body.password;
   const creationDate = req.body.creationDate;
@@ -45,19 +46,27 @@ app.post('/api/urlshort', (req, res) => {
   if (!originalUrl || originalUrl.length <= 0) {
     return res.status(400).json({ error: 'No URL provided' })
   }
+  try {
+    let hashedPassword = null;
+    if (password) {
+      const saltRounds = 10;
+      hashedPassword = await bcrypt.hash(password, saltRounds);
+    }
+    generateUniqueId((shortUrlId) => {
+      const query = `INSERT INTO urls (id, original_url, creation_date, password, expiration_date) VALUES (?, ?, ?, ?, ?)`;
 
-  generateUniqueId((shortUrlId) => {
-    const query = `INSERT INTO urls (id, original_url, creation_date, password, expiration_date) VALUES (?, ?, ?, ?, ?)`;
+      db.run(query, [shortUrlId, originalUrl, creationDate, hashedPassword, expirationDate], (error) => {
+        if (error) {
+          return console.error(error.message);
+        }
 
-    db.run(query, [shortUrlId, originalUrl, creationDate, password, expirationDate], (error) => {
-      if (error) {
-        return console.error(error.message);
-      }
-
-      const shortUrl = `https://sebastian.lab.doqimi.net/${shortUrlId}`;
-      res.json({ shortUrl });
+        const shortUrl = `https://sebastian.lab.doqimi.net/${shortUrlId}`;
+        res.json({ shortUrl });
+      });
     });
-  });
+  } catch (error) {
+
+  }
 });
 
 app.get('/:shortUrlId', (req, res) => {
@@ -93,21 +102,25 @@ app.post('/api/verifypass/:shortUrlId', (req, res) => {
 
   const query = `SELECT original_url, password FROM urls WHERE id = ?`;
 
-  db.get(query, [shortUrlId], (error, row) => {
+  db.get(query, [shortUrlId], async (error, row) => {
     if (error) {
       return res.status(500).sendFile(path.resolve(__dirname, '../client/build', 'error_500.html'));
     }
     if (!row) {
       return res.status(404).sendFile(path.resolve(__dirname, '../client/build', 'error_404.html'));
     }
+    try {
+      const match = await bcrypt.compare(password, row.password);
 
-    if (row.password === password) {
-      return res.json({original_url: row.original_url})
-    } else {
-      return res.status(401).json({ error: 'Incorrect password' });
+      if (match) {
+        return res.json({ original_url: row.original_url });
+      } else {
+        return res.status(401).json({ error: 'Incorrect password' });
+      }
+    } catch (error) {
+      return res.status(500).json({ error: 'Error verifying password' });
     }
   });
-
 });
 
 app.listen(PORT, '0.0.0.0', () => {
