@@ -4,7 +4,7 @@
   "description": "URL Shortener in NodeJS with ReactJS",
   "main": "index.js",
   "engines": {
-    "node": "22.5.1"
+    "node": "22.10.0"
   },
   "scripts": {
     "start": "node server/index.js",
@@ -18,7 +18,9 @@
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.4",
     "@mui/material": "^6.1.4",
+    "@mui/x-date-pickers": "^7.21.0",
     "axios": "^1.7.7",
+    "cors": "^2.8.5",
     "express": "^4.21.1",
     "shortid": "^2.2.16",
     "sqlite3": "^5.1.7",

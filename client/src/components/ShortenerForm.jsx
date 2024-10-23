@@ -1,101 +1,91 @@
-import { Button, Grid2 as Grid, IconButton, Snackbar, TextField, Tooltip, Typography } from '@mui/material';
-import { useState } from 'react';
-import axios from 'axios';
-import { ContentCopy as ContentCopyIcon, Close as CloseIcon} from '@mui/icons-material';
+import { useContext } from 'react';
+import dayjs from 'dayjs';
+import { Button, Checkbox, FormControlLabel, Grid2 as Grid, TextField, Toolbar } from '@mui/material';
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
-const ShortenerForm = () => {
-  const [originalUrl, setOriginalUrl] = useState('');
-  const [shortUrl, setShortUrl] = useState('');
-  const [copyUrl, setCopyUrl] = useState(false);
-  const [copyUrlMessage, setCopyUrlMessage] = useState('');
+import ShowShortenUrl from './ShowShortenUrl';
 
-  const getShortenedUrl = async () => {
-    try {
-      const response = await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl });
-      setShortUrl(response.data.shortUrl);
-    } catch (error) {
-      console.error('Error shortering the URL: ', error);
-    }
-  }
+import { MyContext } from '../context/MyContext';
 
-  const copyShortUrlToClipboard = () => {
-    if (shortUrl.length > 0) {
-      navigator.clipboard.writeText(shortUrl).then(() => {
-        setCopyUrl(true);
-        setCopyUrlMessage('URL copied successfully')
-      }).catch((error) => {
-        setCopyUrl(true);
-        setCopyUrlMessage('Error copying URL');
-      });
-    }
-  }
-
-  const handleCloseSnackbar = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-
-    setCopyUrl(false);
-  };
-
-  const action = (
-    <IconButton
-      size="small"
-      onClick={handleCloseSnackbar}
-    >
-      <CloseIcon fontSize="small" />
-    </IconButton>
-  )
-
+const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
+  const { shortUrl, originalUrl, setOriginalUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
   return (
-    <Grid container justifyContent={'center'}>
-      <Grid item margin={4} size={12}>
-        <Typography variant='h4' textAlign={'center'}>URL Shortener</Typography>
-      </Grid>
-      <Grid item size={{ xs: 10, md: 8 }}>
-        <Grid container spacing={2}>
-          <Grid item size={12}>
-            <Grid container spacing={2} alignItems={'center'}>
-              <Grid item size={{ xs: 12, md: 10 }}>
-                <TextField
-                  required
-                  id="url-text"
-                  label="Paste the URL: "
-                  fullWidth
-                  onChange={(e) => { setOriginalUrl(e.target.value) }}
-                />
-              </Grid>
-              <Grid item size={{ xs: 12, md: 2 }}>
-                <Button size={'large'} onClick={() => getShortenedUrl()}>Shorten</Button>
-              </Grid>
+    <Grid item size={{ xs: 10, md: 8 }}>
+      <Grid container spacing={2}>
+        <Grid item size={12}>
+          <Grid container spacing={2} alignItems={'center'}>
+            <Grid item size={{ xs: 12, md: 10 }}>
+              <TextField
+                required
+                id="url-text"
+                label="Paste the URL: "
+                fullWidth
+                onChange={(e) => setOriginalUrl(e.target.value)}
+              />
             </Grid>
-          </Grid>
-          <Grid item size={12}>
-            <Grid container>
-              <Grid item size={{ xs: 12, md: 2 }}>
-                <Typography variant='subtitle1'>Shortened URL: </Typography>
-              </Grid>
-              <Grid item size={{ xs: 11, md: 9 }}>
-                <Typography variant='subtitle1'>{shortUrl}</Typography>
-              </Grid>
-              <Grid item size={{ xs: 1, md: 1 }} visibility={shortUrl.length > 0 ? 'visible' : 'hidden'}>
-                <Tooltip title='Copy to clipboard'>
-                  <IconButton onClick={() => copyShortUrlToClipboard()}>
-                    <ContentCopyIcon />
-                  </IconButton>
-                </Tooltip>
-              </Grid>
+            <Grid item size={{ xs: 12, md: 2 }}>
+              <Toolbar title={originalUrl.length <= 0 ? 'Please set an URL' : 'Shorten URL'}>
+                <Button
+                  size={'large'}
+                  onClick={() => getShortenedUrl()}
+                  disabled={originalUrl.length <= 0 ? true : false}>
+                  Shorten
+                </Button>
+              </Toolbar>
             </Grid>
           </Grid>
         </Grid>
+        <Grid item size={12}>
+          <Grid container spacing={2} alignItems={'center'}>
+            <Grid item size={10}>
+              <Grid container spacing={2}>
+                <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
+                  <FormControlLabel
+                    control={<Checkbox checked={hasPassword} onChange={(e) => handleCheckPassword(e)} />}
+                    label="Set password to URL: "
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12, md: 8 }}>
+                  <TextField
+                    id="url-password"
+                    label="Type password: "
+                    type="password"
+                    fullWidth
+                    disabled={!hasPassword}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value) }}
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
+                  <FormControlLabel
+                    control={<Checkbox checked={hasExpirationDate} onChange={(e) => handleCheckExpirationDate(e)} />}
+                    label="Set expiration date to URL:"
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12, md: 8 }}>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['DatePicker']}>
+                      <DatePicker
+                        disabled={!hasExpirationDate}
+                        label="Set expiration date"
+                        value={expirationDate}
+                        minDate={dayjs()}
+                        onChange={(newValue) => setExpirationDate(newValue)}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item size={12}>
+            </Grid>
+          </Grid>
+        </Grid>
+        <ShowShortenUrl shortUrl={shortUrl} copyShortUrlToClipboard={() => copyShortUrlToClipboard()} />
       </Grid>
-      <Snackbar
-        open={copyUrl}
-        autoHideDuration={5000}
-        onClose={handleCloseSnackbar}
-        message={copyUrlMessage}
-        action={action}
-      />
     </Grid>
   )
 }
