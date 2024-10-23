@@ -32,6 +32,10 @@ app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
 });
 
+app.get('/redirect/:shortUrlId', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
+});
+
 app.post('/api/urlshort', (req, res) => {
   const originalUrl = req.body.url;
   const password = req.body.password;
@@ -44,7 +48,7 @@ app.post('/api/urlshort', (req, res) => {
 
   generateUniqueId((shortUrlId) => {
     const query = `INSERT INTO urls (id, original_url, creation_date, password, expiration_date) VALUES (?, ?, ?, ?, ?)`;
-    
+
     db.run(query, [shortUrlId, originalUrl, creationDate, password, expirationDate], (error) => {
       if (error) {
         return console.error(error.message);
@@ -58,18 +62,52 @@ app.post('/api/urlshort', (req, res) => {
 
 app.get('/:shortUrlId', (req, res) => {
   const shortUrlId = req.params.shortUrlId;
-  const query = `SELECT original_url FROM urls WHERE id = ?`;
+  const query = `SELECT original_url, password, expiration_date FROM urls WHERE id = ?`;
 
   db.get(query, [shortUrlId], (error, row) => {
     if (error) {
-      return console.log(error.message);
+      return res.status(500).sendFile(path.resolve(__dirname, '../client/build', 'error_500.html'));
     }
     if (!row) {
-      return res.status(404).json({ error: 'URL not found' });
+      return res.status(404).sendFile(path.resolve(__dirname, '../client/build', 'error_404.html'));
+    }
+
+    const today = new Date();
+    if (row.expiration_date) {
+      const expirationDate = new Date(row.expiration_date);
+      if (expirationDate < today) {
+        return res.status(410).sendFile(path.resolve(__dirname, '../client/build', 'error_expired.html'));
+      }
+    }
+    if (row.password) {
+      return res.redirect(`/redirect/${shortUrlId}`);
     }
 
     res.redirect(row.original_url);
   });
+});
+
+app.post('/api/verifypass/:shortUrlId', (req, res) => {
+  const shortUrlId = req.params.shortUrlId;
+  const password = req.body.password;
+
+  const query = `SELECT original_url, password FROM urls WHERE id = ?`;
+
+  db.get(query, [shortUrlId], (error, row) => {
+    if (error) {
+      return res.status(500).sendFile(path.resolve(__dirname, '../client/build', 'error_500.html'));
+    }
+    if (!row) {
+      return res.status(404).sendFile(path.resolve(__dirname, '../client/build', 'error_404.html'));
+    }
+
+    if (row.password === password) {
+      return res.redirect(row.original_url);
+    } else {
+      return res.status(401).json({ error: 'Incorrect password' });
+    }
+  });
+
 });
 
 app.listen(PORT, '0.0.0.0', () => {

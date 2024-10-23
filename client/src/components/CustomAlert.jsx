@@ -1,15 +1,27 @@
 import { Alert, Snackbar } from "@mui/material";
+import { useContext } from "react";
+import { MyContext } from "../context/MyContext";
 
-const CustomAlert = ({openAlert, handleCloseSnackbar, alertType, alertMessage}) => {
+const CustomAlert = () => {
+  const { customAlert, setCustomAlert } = useContext(MyContext);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setCustomAlert({ open: false, type: '', message: "" });
+  };
+
   return (
-    <Snackbar open={openAlert} autoHideDuration={5000} onClose={() => handleCloseSnackbar()}>
+    <Snackbar open={customAlert.open} autoHideDuration={3000} onClose={() => handleCloseSnackbar()}>
       <Alert
         onClose={() => handleCloseSnackbar()}
-        severity={alertType}
+        severity={customAlert.type}
         variant="filled"
         sx={{ width: '100%' }}
       >
-        {alertMessage}
+        {customAlert.message}
       </Alert>
     </Snackbar>
   )

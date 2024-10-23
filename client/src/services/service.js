@@ -1,8 +1,8 @@
 import axios from "axios";
 
-const getShortenedUrl = async (originalUrl, password, creationDate, expirationDate, setShortUrl) => {
+export const getShortenedUrl = async (originalUrl, password, creationDate, expirationDate, setShortUrl) => {
   try {
-    await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate }).then((urlResponse) => {
+    await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
       setShortUrl(urlResponse.data.shortUrl);
     });
   } catch (error) {
@@ -10,4 +10,10 @@ const getShortenedUrl = async (originalUrl, password, creationDate, expirationDa
   }
 }
 
-export default getShortenedUrl;
+export const passwordMatches = async (shortUrlId, password, ) => {
+  try {
+    await axios.post(`http://localhost:3001/api/verifypass/${shortUrlId}`, { password: password});
+  } catch (error) {
+    console.error('Error with password: ', error);
+  }
+}
