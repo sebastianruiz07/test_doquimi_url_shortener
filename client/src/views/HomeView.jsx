@@ -16,7 +16,7 @@ const HomeView = () => {
     }
     try {
       const creationDate = dayjs();
-      await axios.post('http://localhost:3001/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
+      await axios.post('https://sebastian.lab.doqimi.net/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
         setShortUrl(urlResponse.data.shortUrl);
       });
     } catch (error) {

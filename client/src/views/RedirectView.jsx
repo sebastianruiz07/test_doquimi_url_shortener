@@ -13,7 +13,7 @@ const RedirectView = () => {
 
   const verifyPassword = async () => {
     try {
-      await axios.post(`http://localhost:3001/api/verifypass/${shortUrlId}`, { password: password }).then((response) => {
+      await axios.post(`https://sebastian.lab.doqimi.net/api/verifypass/${shortUrlId}`, { password: password }).then((response) => {
         window.location.href = response.data.original_url;
       });
     } catch (error) {
