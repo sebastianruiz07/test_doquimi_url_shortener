@@ -1,8 +1,13 @@
-const path = require('path');
-const express = require("express");
-const sqlite3 = require('sqlite3').verbose();
-const cors = require('cors');
-const { generateUniqueId } = require('./util/urlUtils');
+import path from 'path';
+import express from "express";
+import sqlite3 from 'sqlite3';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import { generateUniqueId, insertUrl } from './util/urlUtils.js';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const PORT = process.env.PORT || 3001;
 
@@ -36,28 +41,38 @@ app.get('/redirect/:shortUrlId', (req, res) => {
   res.sendFile(path.resolve(__dirname, '../client/build', 'index.html'));
 });
 
-app.post('/api/urlshort', (req, res) => {
-  const originalUrl = req.body.url;
-  const password = req.body.password;
-  const creationDate = req.body.creationDate;
-  const expirationDate = req.body.expirationDate;
+app.post('/api/urlshort', async (req, res) => {
+  const { url: originalUrl, password, creationDate, expirationDate, customUrl } = req.body;
 
   if (!originalUrl || originalUrl.length <= 0) {
     return res.status(400).json({ error: 'No URL provided' })
   }
-
-  generateUniqueId((shortUrlId) => {
-    const query = `INSERT INTO urls (id, original_url, creation_date, password, expiration_date) VALUES (?, ?, ?, ?, ?)`;
-
-    db.run(query, [shortUrlId, originalUrl, creationDate, password, expirationDate], (error) => {
-      if (error) {
-        return console.error(error.message);
-      }
-
-      const shortUrl = `http://sebastian.lab.doqimi.net:3001/${shortUrlId}`;
-      res.json({ shortUrl });
-    });
-  });
+  try {
+    let hashedPassword = null;
+    if (password) {
+      const saltRounds = 10;
+      hashedPassword = await bcrypt.hash(password, saltRounds);
+    }
+    if (customUrl) {
+      const checkQuery = `SELECT id FROM urls WHERE id = ?`;
+      db.get(checkQuery, [customUrl], (error, row) => {
+        if (error) {
+          return res.status(500).json({ error: 'Database error occurred' });
+        }
+        if (row) {
+          return res.status(409).json({ error: 'Custom URL already exists' });
+        }
+        insertUrl(customUrl, originalUrl, creationDate, hashedPassword, expirationDate, res);
+      });
+    } else {
+      generateUniqueId((shortUrlId) => {
+        insertUrl(shortUrlId, originalUrl, creationDate, hashedPassword, expirationDate, res);
+      });
+    }
+  } catch (error) {
+    console.error('Error processing request: ', error);
+    res.status(500).json({ error: 'An error occurred' });
+  }
 });
 
 app.get('/:shortUrlId', (req, res) => {
@@ -93,21 +108,25 @@ app.post('/api/verifypass/:shortUrlId', (req, res) => {
 
   const query = `SELECT original_url, password FROM urls WHERE id = ?`;
 
-  db.get(query, [shortUrlId], (error, row) => {
+  db.get(query, [shortUrlId], async (error, row) => {
     if (error) {
       return res.status(500).sendFile(path.resolve(__dirname, '../client/build', 'error_500.html'));
     }
     if (!row) {
       return res.status(404).sendFile(path.resolve(__dirname, '../client/build', 'error_404.html'));
     }
+    try {
+      const match = await bcrypt.compare(password, row.password);
 
-    if (row.password === password) {
-      return res.json({original_url: row.original_url})
-    } else {
-      return res.status(401).json({ error: 'Incorrect password' });
+      if (match) {
+        return res.json({ original_url: row.original_url });
+      } else {
+        return res.status(401).json({ error: 'Incorrect password' });
+      }
+    } catch (error) {
+      return res.status(500).json({ error: 'Error verifying password' });
     }
   });
-
 });
 
 app.listen(PORT, '0.0.0.0', () => {
