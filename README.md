@@ -24,7 +24,7 @@ URL Shortener is a web application built with Node.js and React.js that allows u
 
 ```bash
 git clone https://github.com/sebastianruiz07/test_doquimi_url_shortener.git
-cd your_repo
+cd test_doquimi_url_shortener/
 ```
 
 ### Install the dependencies / Build the project
