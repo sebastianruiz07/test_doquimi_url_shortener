@@ -30,7 +30,8 @@ db.run(
     original_url TEXT NOT NULL,
     creation_date DATE,
     password TEXT,
-    expiration_date DATE)`
+    expiration_date DATE,
+    access_count INTEGER DEFAULT 0)`
 );
 
 app.get('/', (req, res) => {
@@ -86,6 +87,13 @@ app.get('/:shortUrlId', (req, res) => {
     if (!row) {
       return res.status(404).sendFile(path.resolve(__dirname, '../client/build', 'error_404.html'));
     }
+
+    const incrementQuery = `UPDATE urls SET access_count = access_count + 1 WHERE id = ?`;
+    db.run(incrementQuery, [shortUrlId], (error) => {
+      if (error) {
+        console.error('Error updating click count: ', error);
+      }
+    });
 
     const today = new Date();
     if (row.expiration_date) {

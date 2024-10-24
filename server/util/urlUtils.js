@@ -8,7 +8,7 @@ const apiUrl = process.env.API_URL;
 const db = new sqlite3.Database('./urlShortener.db');
 
 const generateUniqueId = (callback) => {
-  const shortUrlId = nanoid();
+  const shortUrlId = nanoid(10);
   const query = `SELECT id FROM urls WHERE id = ?`;
 
   db.get(query, [shortUrlId], (error, row) => {
