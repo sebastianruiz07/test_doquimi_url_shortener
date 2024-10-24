@@ -11,15 +11,15 @@ import ShowShortenUrl from './ShowShortenUrl';
 
 import { MyContext } from '../context/MyContext';
 
-const ShortenerForm = ({ getShortenedUrl, handleCheckCustomUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
-  const { shortUrl, originalUrl, setOriginalUrl, hasCustomUrl, customUrl, setCustomUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
-  
+const ShortenerForm = ({ getShortenedUrl, handleCheckCustomUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard, shortUrlMessage }) => {
+  const { originalUrl, setOriginalUrl, hasCustomUrl, customUrl, setCustomUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
+
   const handleChangeCustomUrl = (value) => {
     if (value.length <= 15) {
       setCustomUrl(value);
     }
   }
-  
+
   return (
     <Grid item size={{ xs: 11, md: 9 }}>
       <Grid container spacing={2} justifyContent={'center'}>
@@ -31,6 +31,7 @@ const ShortenerForm = ({ getShortenedUrl, handleCheckCustomUrl, handleCheckPassw
                 id="url-text"
                 label="Paste the URL: https://example.com"
                 fullWidth
+                value={originalUrl}
                 onChange={(e) => setOriginalUrl(e.target.value)}
               />
             </Grid>
@@ -108,7 +109,7 @@ const ShortenerForm = ({ getShortenedUrl, handleCheckCustomUrl, handleCheckPassw
             </Button>
           </Toolbar>
         </Grid>
-        <ShowShortenUrl shortUrl={shortUrl} copyShortUrlToClipboard={() => copyShortUrlToClipboard()} />
+        <ShowShortenUrl shortUrlMessage={shortUrlMessage} copyShortUrlToClipboard={() => copyShortUrlToClipboard()} />
       </Grid>
     </Grid>
   )
