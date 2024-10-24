@@ -1,6 +1,10 @@
 import { nanoid } from 'nanoid';
 import sqlite3 from 'sqlite3';
+import dotenv from 'dotenv'
 
+dotenv.config();
+
+const apiUrl = process.env.API_URL;
 const db = new sqlite3.Database('./urlShortener.db');
 
 const generateUniqueId = (callback) => {
@@ -28,7 +32,7 @@ const insertUrl = (shortUrlId, originalUrl, creationDate, hashedPassword, expira
       return res.status(500).json({ error: 'Failed to insert URL' });
     }
 
-    const shortUrl = `https://sebastian.lab.doqimi.net/${shortUrlId}`;
+    const shortUrl = `${apiUrl}/${shortUrlId}`;
     res.json({ shortUrl });
   });
 };

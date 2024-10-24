@@ -7,7 +7,7 @@ import { MyContext } from "../context/MyContext";
 import CustomAlert from '../components/CustomAlert';
 
 const HomeView = () => {
-  const { shortUrl, originalUrl, setHasCustomUrl, customUrl, setCustomUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
+  const { apiUrl, shortUrl, originalUrl, setHasCustomUrl, customUrl, setCustomUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
 
   const validateUrl = (url) => {
     const urlPattern = new RegExp(
@@ -31,11 +31,11 @@ const HomeView = () => {
     }
     try {
       const creationDate = dayjs();
-      await axios.post('https://sebastian.lab.doqimi.net/api/urlshort', { url: originalUrl, customUrl: customUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
+      await axios.post(`${apiUrl}/api/urlshort`, { url: originalUrl, customUrl: customUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
         setShortUrl(urlResponse.data.shortUrl);
       });
     } catch (error) {
-      setCustomAlert({ open: true, type: 'error', message: `Error shortering the URL: ${error.message}` });
+      setCustomAlert({ open: true, type: 'error', message: `Error: This URL already exists` });
       console.error('Error shortering the URL: ', error);
     }
   }

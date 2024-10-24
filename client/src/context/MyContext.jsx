@@ -3,6 +3,7 @@ import React, { createContext, useState } from 'react';
 export const MyContext = createContext();
 
 export const MyProvider = ({ children }) => {
+  const apiUrl = process.env.REACT_APP_API_URL;
   const [originalUrl, setOriginalUrl] = useState('');
   const [shortUrl, setShortUrl] = useState('');
   const [customAlert, setCustomAlert] = useState({ open: false, type: '', message: '' });
@@ -14,7 +15,7 @@ export const MyProvider = ({ children }) => {
   const [expirationDate, setExpirationDate] = useState(null);
 
   return (
-    <MyContext.Provider value={{ originalUrl, setOriginalUrl, shortUrl, setShortUrl, customAlert, setCustomAlert, hasCustomUrl, setHasCustomUrl, customUrl, setCustomUrl, hasPassword, setHasPassword, password, setPassword, hasExpirationDate, setHasExpirationDate, expirationDate, setExpirationDate }}>
+    <MyContext.Provider value={{ apiUrl, originalUrl, setOriginalUrl, shortUrl, setShortUrl, customAlert, setCustomAlert, hasCustomUrl, setHasCustomUrl, customUrl, setCustomUrl, hasPassword, setHasPassword, password, setPassword, hasExpirationDate, setHasExpirationDate, expirationDate, setExpirationDate }}>
       {children}
     </MyContext.Provider>
   );
