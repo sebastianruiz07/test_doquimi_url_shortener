@@ -25,7 +25,7 @@ const ShowShortenUrl = ({ shortUrlMessage, copyShortUrlToClipboard }) => {
         <Grid item size={{ xs: 0, md: 2 }}>
         </Grid>
         <Grid item size={{ xs: 12, md: 10 }}>
-          <Typography variant='caption'>{shortUrlMessage}</Typography>
+          <Typography variant='caption' style={{ wordBreak: 'break-word' }}>{shortUrlMessage}</Typography>
         </Grid>
       </Grid>
     </Grid>

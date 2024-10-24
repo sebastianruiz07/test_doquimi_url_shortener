@@ -126,7 +126,7 @@ const HomeView = () => {
   return (
     <Grid container justifyContent={'center'} size={12}>
       <Grid item margin={4} size={12}>
-        <Typography variant='h4' textAlign={'center'}>URL Shortener</Typography>
+        <Typography variant='h3' textAlign={'center'}>URL Shortener</Typography>
       </Grid>
       <ShortenerForm
         getShortenedUrl={getShortenedUrl}
