@@ -11,8 +11,15 @@ import ShowShortenUrl from './ShowShortenUrl';
 
 import { MyContext } from '../context/MyContext';
 
-const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
-  const { shortUrl, originalUrl, setOriginalUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
+const ShortenerForm = ({ getShortenedUrl, handleCheckCustomUrl, handleCheckPassword, handleCheckExpirationDate, copyShortUrlToClipboard }) => {
+  const { shortUrl, originalUrl, setOriginalUrl, hasCustomUrl, customUrl, setCustomUrl, hasPassword, password, setPassword, hasExpirationDate, expirationDate, setExpirationDate } = useContext(MyContext);
+  
+  const handleChangeCustomUrl = (value) => {
+    if (value.length <= 15) {
+      setCustomUrl(value);
+    }
+  }
+  
   return (
     <Grid item size={{ xs: 11, md: 9 }}>
       <Grid container spacing={2} justifyContent={'center'}>
@@ -35,6 +42,23 @@ const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpira
               <Grid container spacing={2}>
                 <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
                   <FormControlLabel
+                    control={<Checkbox checked={hasCustomUrl} onChange={(e) => handleCheckCustomUrl(e)} />}
+                    label="Set custom URL"
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12, md: 8 }}>
+                  <TextField
+                    id="url-custom"
+                    label="Type custom URL: "
+                    fullWidth
+                    helperText={"Character limit: 15"}
+                    value={customUrl}
+                    sx={{ visibility: hasCustomUrl ? 'visible' : 'hidden' }}
+                    onChange={(e) => { handleChangeCustomUrl(e.target.value) }}
+                  />
+                </Grid>
+                <Grid item size={{ xs: 12, md: 4 }} alignContent={'center'}>
+                  <FormControlLabel
                     control={<Checkbox checked={hasPassword} onChange={(e) => handleCheckPassword(e)} />}
                     label="Set password to URL"
                   />
@@ -45,9 +69,8 @@ const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpira
                     label="Type password: "
                     type="password"
                     fullWidth
-                    disabled={!hasPassword}
                     value={password}
-                    sx={{visibility: hasPassword ? 'visible' : 'hidden'}}
+                    sx={{ visibility: hasPassword ? 'visible' : 'hidden' }}
                     onChange={(e) => { setPassword(e.target.value) }}
                   />
                 </Grid>
@@ -59,9 +82,8 @@ const ShortenerForm = ({ getShortenedUrl, handleCheckPassword, handleCheckExpira
                 </Grid>
                 <Grid item size={{ xs: 12, md: 8 }}>
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer components={['DatePicker']} sx={{visibility: hasExpirationDate ? 'visible' : 'hidden'}}>
+                    <DemoContainer components={['DatePicker']} sx={{ visibility: hasExpirationDate ? 'visible' : 'hidden' }}>
                       <DatePicker
-                        disabled={!hasExpirationDate}
                         label="Set expiration date"
                         value={expirationDate}
                         minDate={dayjs()}

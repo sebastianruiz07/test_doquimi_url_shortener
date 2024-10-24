@@ -7,7 +7,7 @@ import { MyContext } from "../context/MyContext";
 import CustomAlert from '../components/CustomAlert';
 
 const HomeView = () => {
-  const { shortUrl, originalUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
+  const { shortUrl, originalUrl, setHasCustomUrl, customUrl, setCustomUrl, setHasPassword, password, setPassword, setHasExpirationDate, expirationDate, setExpirationDate, setCustomAlert, setShortUrl } = useContext(MyContext);
 
   const validateUrl = (url) => {
     const urlPattern = new RegExp(
@@ -31,11 +31,11 @@ const HomeView = () => {
     }
     try {
       const creationDate = dayjs();
-      await axios.post('https://sebastian.lab.doqimi.net/api/urlshort', { url: originalUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
+      await axios.post('https://sebastian.lab.doqimi.net/api/urlshort', { url: originalUrl, customUrl: customUrl, password: password, creationDate: creationDate, expirationDate: expirationDate ? expirationDate.endOf('day') : null }).then((urlResponse) => {
         setShortUrl(urlResponse.data.shortUrl);
       });
     } catch (error) {
-      setCustomAlert({ open: true, type: 'error', message: 'Error shortering the URL' });
+      setCustomAlert({ open: true, type: 'error', message: `Error shortering the URL: ${error.message}` });
       console.error('Error shortering the URL: ', error);
     }
   }
@@ -47,6 +47,14 @@ const HomeView = () => {
       }).catch((error) => {
         setCustomAlert({ open: true, type: 'error', message: "Error copying URL" });
       });
+    }
+  }
+
+  const handleCheckCustomUrl = (event) => {
+    setHasCustomUrl(event.target.checked);
+
+    if (!event.target.checked) {
+      setCustomUrl('');
     }
   }
 
@@ -76,6 +84,7 @@ const HomeView = () => {
       </Grid>
       <ShortenerForm
         getShortenedUrl={getShortenedUrl}
+        handleCheckCustomUrl={handleCheckCustomUrl}
         handleCheckPassword={handleCheckPassword}
         handleCheckExpirationDate={handleCheckExpirationDate}
         copyShortUrlToClipboard={copyShortUrlToClipboard} />
