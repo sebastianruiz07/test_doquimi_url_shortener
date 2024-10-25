@@ -10,6 +10,7 @@ URL Shortener is a web application built with Node.js and React.js that allows u
 - [Environment Configuration](#environment-configuration)
 - [Technologies](#technologies)
 - [Improvements](#improvements)
+- [Optional](#optional)
 
 
 ## Installation
@@ -100,3 +101,11 @@ This project uses a .env file to manage environment variables. You must make sur
 - URL Analytics: Provide statistics for each shortened URL, such as the number of clicks, geographic locations of visitors, and the devices used.
 
 - Custom URL Expiration Alerts: Allow users to set alerts for when their URLs are about to expire, giving them an option to extend or renew the expiration date.
+
+
+## Optional
+
+### HTTPS Configuration
+
+For enhanced security, you may want to enable HTTPS on your server. You can follow the official Nginx documentation for configuring HTTPS servers [here](https://nginx.org/en/docs/http/configuring_https_servers.html) and use the Certbot guide for setting up SSL certificates with Nginx [here](https://certbot.eff.org/instructions?ws=nginx&os=snap). These resources will help you secure your application effectively.
+
